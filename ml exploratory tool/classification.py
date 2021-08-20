@@ -45,33 +45,13 @@ def get_imputer(imputer):
     if imputer == 'Median':
         return SimpleImputer(strategy='median', missing_values=np.nan)
 
-def get_pipeline_missing_num(imputer, scaler):
-    if imputer == 'None':
-        return 'drop'
-    if imputer == 'Mean':
-        pipeline = make_pipeline(SimpleImputer(strategy='mean', missing_values=np.nan))
-    if imputer == 'Median':
-        pipeline = make_pipeline(SimpleImputer(strategy='median', missing_values=np.nan))
-    if(scaler != 'None'):
-        pipeline.steps.append(('scaling', get_scaling(scaler)))
-    return pipeline
-
-
-def get_pipeline_missing_cat(imputer, encoder):
-    if imputer == 'None' or encoder == 'None':
-        return 'drop'
-    if imputer == 'Most frequent value':
-        pipeline = make_pipeline(SimpleImputer(strategy='most_frequent', missing_values=np.nan))
-    pipeline.steps.append(('encoding', get_encoding(encoder)))
-    return pipeline
-
-def get_encoding(encoder):
+def get_encoder(encoder):
     if encoder == 'None':
         return 'drop'
     if encoder == 'OneHotEncoder':
         return OneHotEncoder(handle_unknown='ignore', sparse=False)
 
-def get_scaling(scaler):
+def get_scaler(scaler):
     if scaler == 'None':
         return 'passthrough'
     if scaler == 'Standard scaler':
@@ -80,6 +60,24 @@ def get_scaling(scaler):
         return MinMaxScaler()
     if scaler == 'Robust scaler':
         return RobustScaler()
+
+        
+
+def get_pipeline_missing_num(imputer, scaler):
+    if imputer == 'None':
+        return 'drop'
+    pipeline = make_pipeline(get_imputer(imputer))
+    pipeline.steps.append(('scaling', get_scaler(scaler)))
+    return pipeline
+
+
+def get_pipeline_missing_cat(imputer, encoder):
+    if imputer == 'None' or encoder == 'None':
+        return 'drop'
+    pipeline = make_pipeline(get_imputer(imputer))
+    pipeline.steps.append(('encoding', get_encoder(encoder)))
+    return pipeline
+
 
 def get_ml_algorithm(algorithm):
     if algorithm == 'Logistic regression':
@@ -120,7 +118,7 @@ num_cols = ['Fare']
 drop_cols = ['PassengerId']
 
 X = df.drop(columns = target_selected)
-Y = df[target_selected].values.ravel()
+y = df[target_selected].values.ravel()
 
 #Sidebar 
 #selection box for the different features
@@ -140,8 +138,8 @@ preprocessing = make_column_transformer(
     (get_pipeline_missing_cat(categorical_imputer_selected, encoder_selected) , cat_cols_missing),
     (get_pipeline_missing_num(numerical_imputer_selected, scaler_selected) , num_cols_missing),
 
-    (get_encoding(encoder_selected), cat_cols),
-    (get_scaling(scaler_selected), num_cols),
+    (get_encoder(encoder_selected), cat_cols),
+    (get_scaler(scaler_selected), num_cols),
     ("drop" , drop_cols)
 )
 
@@ -171,7 +169,7 @@ pipeline = Pipeline([
 ])
 
 folds = KFold(n_splits = 10, shuffle=True, random_state = 0)
-cv_score = cross_val_score(pipeline, X, Y, cv=folds)
+cv_score = cross_val_score(pipeline, X, y, cv=folds)
 
 st.subheader('Results')
 st.write('Accuracy : ', round(cv_score.mean()*100,2), '%')
