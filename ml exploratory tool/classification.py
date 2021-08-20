@@ -3,18 +3,13 @@ import pandas as pd
 import numpy as np
 import os
 
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler, RobustScaler
 from sklearn.impute import SimpleImputer
 
-from sklearn.pipeline import make_pipeline
-from sklearn.compose import make_column_transformer 
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import make_pipeline, Pipeline
+from sklearn.compose import make_column_transformer
 
-from sklearn.model_selection import KFold
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold, cross_val_score
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -84,17 +79,13 @@ def get_ml_algorithm(algorithm):
 #configuration of the page
 st.set_page_config(layout="wide")
 
-title_spacer1, title, title_spacer_2 = st.beta_columns((.1,1,.1))
-with title:
-    st.title('Classification exploratory tool')
-    st.markdown("""
+
+st.title('Classification exploratory tool')
+st.markdown("""
             This app allows you to test different machine learning 
             algorithms and combinations of preprocessing techniques 
             to classify passengers from the Titanic dataset!
             """)
-
-st.write("")
-
 
 df = get_data_titanic()
 
@@ -123,7 +114,6 @@ encoder_selected = st.sidebar.selectbox('Encoding categorical values', ['None', 
 scaler_selected = st.sidebar.selectbox('Scaling', ['None', 'Standard scaler', 'MinMax scaler', 'Robust scaler'])
 
 
-
 #need to make two preprocessing pipeline too handle the case encoding without imputer...
 preprocessing = make_column_transformer(
     (get_pipeline_missing_cat(categorical_imputer_selected, encoder_selected) , cat_cols_missing),
@@ -135,7 +125,6 @@ preprocessing = make_column_transformer(
 )
 
 
-
 preprocessing_pipeline = Pipeline([
     ('preprocessing' , preprocessing)
 ])
@@ -145,8 +134,6 @@ X_preprocessed = preprocessing_pipeline.transform(X)
 
 st.header('Preprocessed dataset')
 st.write(X_preprocessed)
-
-
 
 
 st.sidebar.title('Model selection')
