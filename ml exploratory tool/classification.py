@@ -1,11 +1,3 @@
-# To do :
-# - joblib to export pipeline
-# - explication joblib et comment utiliser ce model
-# - ajouter l'option d'ajouter un csv et de travailler dessus
-# - 
-
-
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -15,7 +7,6 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import RobustScaler
-
 from sklearn.impute import SimpleImputer
 
 from sklearn.pipeline import make_pipeline
