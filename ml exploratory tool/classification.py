@@ -106,7 +106,6 @@ y = df[target_selected].values.ravel()
 #selection box for the different features
 st.sidebar.title('Preprocessing')
 
-st.sidebar.subheader('Column transformation')
 categorical_imputer_selected = st.sidebar.selectbox('Handling categorical missing values', ['None', 'Most frequent value'])
 numerical_imputer_selected = st.sidebar.selectbox('Handling numerical missing values', ['None', 'Median', 'Mean'])
 
