@@ -49,7 +49,7 @@ def get_scaler(scaler):
 
         
 
-def get_pipeline_missing_num(imputer, scaler):
+def get_pip_mis_num(imputer, scaler):
     if imputer == 'None':
         return 'drop'
     pipeline = make_pipeline(get_imputer(imputer))
@@ -57,7 +57,7 @@ def get_pipeline_missing_num(imputer, scaler):
     return pipeline
 
 
-def get_pipeline_missing_cat(imputer, encoder):
+def get_pip_mis_cat(imputer, encoder):
     if imputer == 'None' or encoder == 'None':
         return 'drop'
     pipeline = make_pipeline(get_imputer(imputer))
@@ -106,18 +106,16 @@ y = df[target_selected].values.ravel()
 #selection box for the different features
 st.sidebar.title('Preprocessing')
 
-categorical_imputer_selected = st.sidebar.selectbox('Handling categorical missing values', ['None', 'Most frequent value'])
-numerical_imputer_selected = st.sidebar.selectbox('Handling numerical missing values', ['None', 'Median', 'Mean'])
+cat_imputer_selected = st.sidebar.selectbox('Handling categorical missing values', ['None', 'Most frequent value'])
+num_imputer_selected = st.sidebar.selectbox('Handling numerical missing values', ['None', 'Median', 'Mean'])
 
 encoder_selected = st.sidebar.selectbox('Encoding categorical values', ['None', 'OneHotEncoder'])
 scaler_selected = st.sidebar.selectbox('Scaling', ['None', 'Standard scaler', 'MinMax scaler', 'Robust scaler'])
 
 
-#need to make two preprocessing pipeline too handle the case encoding without imputer...
-preprocessing = make_column_transformer(
-    (get_pipeline_missing_cat(categorical_imputer_selected, encoder_selected) , cat_cols_missing),
-    (get_pipeline_missing_num(numerical_imputer_selected, scaler_selected) , num_cols_missing),
-
+preprocessing = make_column_transformer( 
+    (get_pip_mis_cat(cat_imputer_selected, encoder_selected) , cat_cols_missing),
+    (get_pip_mis_num(num_imputer_selected, scaler_selected) , num_cols_missing),
     (get_encoder(encoder_selected), cat_cols),
     (get_scaler(scaler_selected), num_cols),
     ("drop" , drop_cols)
