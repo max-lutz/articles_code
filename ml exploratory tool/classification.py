@@ -2,20 +2,15 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
-
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler, RobustScaler
 from sklearn.impute import SimpleImputer
-
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.compose import make_column_transformer
-
 from sklearn.model_selection import KFold, cross_val_score
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
-
 
 #Loading the data
 def get_data_titanic():
@@ -46,9 +41,7 @@ def get_scaler(scaler):
         return MinMaxScaler()
     if scaler == 'Robust scaler':
         return RobustScaler()
-
-        
-
+    
 def get_pip_mis_num(imputer, scaler):
     if imputer == 'None':
         return 'drop'
@@ -56,14 +49,12 @@ def get_pip_mis_num(imputer, scaler):
     pipeline.steps.append(('scaling', get_scaler(scaler)))
     return pipeline
 
-
 def get_pip_mis_cat(imputer, encoder):
     if imputer == 'None' or encoder == 'None':
         return 'drop'
     pipeline = make_pipeline(get_imputer(imputer))
     pipeline.steps.append(('encoding', get_encoder(encoder)))
     return pipeline
-
 
 def get_ml_algorithm(algorithm):
     if algorithm == 'Logistic regression':
@@ -75,20 +66,18 @@ def get_ml_algorithm(algorithm):
     if algorithm == 'Random forest':
         return RandomForestClassifier()
 
-
 #configuration of the page
 st.set_page_config(layout="wide")
-
-
 st.title('Classification exploratory tool')
+
 st.markdown("""
-            This app allows you to test different machine learning 
-            algorithms and combinations of preprocessing techniques 
-            to classify passengers from the Titanic dataset!
-            """)
+This app allows you to test different machine learning
+algorithms and combinations of preprocessing techniques
+to classify passengers from the Titanic dataset!
+""")
 
+#load the data
 df = get_data_titanic()
-
 st.header('Original dataset')
 st.write(df)
 
@@ -102,16 +91,12 @@ drop_cols = ['PassengerId']
 X = df.drop(columns = target_selected)
 y = df[target_selected].values.ravel()
 
-#Sidebar 
-#selection box for the different features
+#Sidebar
 st.sidebar.title('Preprocessing')
-
 cat_imputer_selected = st.sidebar.selectbox('Handling categorical missing values', ['None', 'Most frequent value'])
 num_imputer_selected = st.sidebar.selectbox('Handling numerical missing values', ['None', 'Median', 'Mean'])
-
 encoder_selected = st.sidebar.selectbox('Encoding categorical values', ['None', 'OneHotEncoder'])
 scaler_selected = st.sidebar.selectbox('Scaling', ['None', 'Standard scaler', 'MinMax scaler', 'Robust scaler'])
-
 
 preprocessing = make_column_transformer( 
     (get_pip_mis_cat(cat_imputer_selected, encoder_selected) , cat_cols_missing),
@@ -120,7 +105,6 @@ preprocessing = make_column_transformer(
     (get_scaler(scaler_selected), num_cols),
     ("drop" , drop_cols)
 )
-
 
 preprocessing_pipeline = Pipeline([
     ('preprocessing' , preprocessing)
@@ -132,11 +116,9 @@ X_preprocessed = preprocessing_pipeline.transform(X)
 st.header('Preprocessed dataset')
 st.write(X_preprocessed)
 
-
 st.sidebar.title('Model selection')
 classifier_list = ['Logistic regression', 'Support vector', 'K nearest neighbors', 'Random forest']
 classifier_selected = st.sidebar.selectbox('', classifier_list)
-
 
 pipeline = Pipeline([
     ('preprocessing' , preprocessing),
@@ -145,7 +127,6 @@ pipeline = Pipeline([
 
 folds = KFold(n_splits = 10, shuffle=True, random_state = 0)
 cv_score = cross_val_score(pipeline, X, y, cv=folds)
-
 st.subheader('Results')
 st.write('Accuracy : ', round(cv_score.mean()*100,2), '%')
 st.write('Standard deviation : ', round(cv_score.std()*100,2), '%')
